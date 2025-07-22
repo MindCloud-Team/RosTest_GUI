@@ -1,4 +1,4 @@
-# RosTestGUI
+# Panther Dashboard GUI
 
 ## Introduction
 
