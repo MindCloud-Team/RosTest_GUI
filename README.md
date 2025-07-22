@@ -28,20 +28,19 @@ pip install opencv-python vtk
 ### 2. Clone & Build
 
 ```bash
-1)
 cd ~/ros2_ws/src
-2)
-Option A: Use HTTPS with a GitHub Token
+
+-Option A: Use HTTPS with a GitHub Token
 Generate a GitHub Personal Access Token (PAT) and run:
 git clone https://<USERNAME>:<TOKEN>@github.com/MindCloud-Team/RosTest_GUI.git
-Option B: Use SSH (Recommended for Private Repos)
+-Option B: Use SSH (Recommended for Private Repos)
 If you’ve set up SSH keys with GitHub:
 git clone git@github.com:MindCloud-Team/RosTest_GUI.git
-3)
+
 cd ~/ros2_ws
-4)
+
 colcon build
-5)
+
 source install/setup.bash
 ```
 
@@ -87,8 +86,8 @@ the following topics can be changed to display different topics:
 
 ## Tested On
 
-- Ubuntu 22.04
-- ROS 2 Jazzy
+- Ubuntu 24.04
+- ROS2 Jazzy
 - Panther robot (Husarion) simulated
 
 ## Authors
