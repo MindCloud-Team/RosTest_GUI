@@ -30,14 +30,12 @@ pip install opencv-python vtk
 ```bash
 cd ~/ros2_ws/src
 
-'-Option A: Use HTTPS with a GitHub Token
-Generate a GitHub Personal Access Token (PAT) and run:'
-
+#---Option A: Use HTTPS with a GitHub Token---
+#Generate a GitHub Personal Access Token (PAT) and run:
 git clone https://<USERNAME>:<TOKEN>@github.com/MindCloud-Team/RosTest_GUI.git
 
-'-Option B: Use SSH (Recommended for Private Repos)
-If you’ve set up SSH keys with GitHub:'
-
+#---Option B: Use SSH (Recommended for Private Repos)---
+#If you’ve set up SSH keys with GitHub:
 git clone git@github.com:MindCloud-Team/RosTest_GUI.git
 
 cd ~/ros2_ws
