@@ -1,5 +1,56 @@
 #!/usr/bin/env python3
 
+"""
+Panther Robot GUI Dashboard
+
+This module implements a full-featured GUI interface for the Panther robot using PyQt5.
+It integrates real-time visualization of camera feeds, LiDAR point cloud rendering via VTK,
+and sensor status monitoring, including IMU, battery, odometry, velocity, and E-Stop and finally has a keyboard control of the robot.
+
+System Architecture: GUI Layer
+
+ROS2 Topics:
+    - Publishers:
+        - Topic: /cmd_vel
+          Type: geometry_msgs/TwistStamped
+          Purpose: Sends velocity commands based on keyboard input.
+
+    - Subscribers:
+        - Topic: /battery/battery_status
+          Type: sensor_msgs/BatteryState
+          Purpose: Reads battery level and voltage.
+
+        - Topic: /imu/data
+          Type: sensor_msgs/Imu
+          Purpose: Gets IMU orientation data.
+
+        - Topic: /odometry/wheels
+          Type: nav_msgs/Odometry
+          Purpose: Receives odometry for position tracking.
+
+        - Topic: /cmd_vel
+          Type: geometry_msgs/TwistStamped
+          Purpose: Visualizes last velocity command.
+
+        - Topic: /hardware/e_stop
+          Type: std_msgs/Bool
+          Purpose: Indicates E-Stop status.
+
+        - Topic: /<cam>/zed_node/rgb/image_rect_color
+          Type: sensor_msgs/Image
+          Purpose: Streams image from four directions.
+
+        - Topic: /lidar/velodyne_points
+          Type: sensor_msgs/PointCloud2
+          Purpose: Streams 3D point cloud data for LiDAR.
+
+Main Components:
+    - GUI display using PyQt5.
+    - LiDAR rendering using VTK.
+    - Camera rendering with OpenCV and QImage.
+    - ROS 2 communication with rclpy.
+"""
+
 import sys
 import math
 import time
@@ -54,6 +105,11 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 class ResizablePixmapLabel(QLabel):
+
+    """
+    QLabel subclass to automatically resize images proportionally.
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._full_pixmap = None
@@ -80,7 +136,9 @@ class ResizablePixmapLabel(QLabel):
 
 # --- MODIFICATION: Consolidated ImageProcessor threads into one ---
 class CombinedImageProcessor(QThread):
-    """A single thread to process images from all cameras."""
+    """
+    Worker thread to decode and scale images from all camera topics.
+    """    
     pixmap_ready = pyqtSignal(str, QPixmap)
 
     def __init__(self):
@@ -124,6 +182,10 @@ class CombinedImageProcessor(QThread):
 
 
 def quaternion_to_euler(x, y, z, w):
+    """
+    Converts quaternion to roll, pitch, and yaw in radians.
+    """
+
     t0 = 2 * (w * x + y * z)
     t1 = 1 - 2 * (x * x + y * y)
     r = math.atan2(t0, t1)
@@ -154,6 +216,10 @@ def generate_placeholder_pixmap(t, w=320, h=240):
 
 
 class StatusIndicator(QFrame):
+    """
+    Colored circular indicator for showing sensor status.
+    """
+
     def __init__(self, p=None):
         super().__init__(p)
         self.setFixedSize(20, 20)
@@ -177,11 +243,23 @@ class StatusIndicator(QFrame):
 
 
 class ImageSignal(QObject):
+    """
+    Qt signal interface to connect ROS messages to GUI slots.
+    """
     update_lidar = pyqtSignal(list)
     raw_image_received = pyqtSignal(str, object)
 
 
 class PantherSensorNode(Node):
+    """
+    ROS 2 Node responsible for subscribing to robot sensors and publishing velocity commands.
+
+    Attributes:
+        battery, imu, odom, cmd, e_stop : Latest message values from sensors.
+        image_signal                    : PyQt5 signal emitter for camera and LiDAR updates.
+        cmd_vel_pub                     : Publisher to send velocity commands.
+    """
+
     def __init__(self, image_signal):
         super().__init__("panther_dashboard_gui")
         self.image_signal = image_signal
@@ -251,8 +329,32 @@ class PantherSensorNode(Node):
 
         return c
 
+class RosSpinThread(QThread):
+    """
+    Background ROS spin thread to keep the node responsive.
+    """
+    def __init__(self, node):
+        super().__init__()
+        self.node = node
+
+    def run(self):
+        rclpy.spin(self.node)
+
 
 class PantherDashboard(QMainWindow):
+    """
+    Main GUI window for displaying Panther robot sensor data, camera feeds, and LiDAR visualization.
+
+    Attributes:
+        node                : The ROS node (PantherSensorNode).
+        image_processor     : Background thread for camera image decoding.
+        vtk_widget          : VTK widget for rendering LiDAR data.
+        pressed_keys        : Set of currently pressed keyboard keys.
+        feeds               : Dict of camera QLabel widgets.
+        sensor_labels       : Dict of QLabel widgets for sensor status.
+        status_indicators   : Dict of StatusIndicator objects per camera.
+    """
+
     def __init__(self, node, image_signal):
         super().__init__()
         self.last_lidar_update_time = 0.0
@@ -342,15 +444,19 @@ class PantherDashboard(QMainWindow):
         self.update_timer.start(500)
 
     def distribute_raw_image(self, camera_key, msg):
-        # --- MODIFICATION: Pass image to the single processor ---
+        """Routes camera image to processor thread."""
         self.image_processor.add_image(camera_key, msg)
 
     def update_camera_feed(self, k, p):
+        """Updates camera widget with processed image."""
         if k in self.feeds:
             self.feeds[k].set_full_pixmap(p)
             self.status_indicators[k].set_status("good")
 
     def update_lidar_vtk(self, points):
+        """
+        Updates the LiDAR VTK renderer with new points.
+        """
         current_time = time.time()
         if current_time - self.last_lidar_update_time < 0.1:
             return
@@ -374,10 +480,15 @@ class PantherDashboard(QMainWindow):
         self.vtk_widget.GetRenderWindow().Render()
 
     def reset_lidar_view(self):
+        """Triggers reinitialization of LiDAR camera view."""
+
         self._lidar_camera_initialized = False
         print("LiDAR view reset requested. Will apply on next data frame.")
 
     def closeEvent(self, e):
+        """
+        Called when GUI window is closed.
+        """
         print("Stopping threads...")
         # --- MODIFICATION: Stop the single image processor ---
         self.image_processor.stop()
@@ -385,12 +496,17 @@ class PantherDashboard(QMainWindow):
         super().closeEvent(e)
 
     def keyPressEvent(self, e):
+        """Captures key press for W/A/S/D motion."""
         self.pressed_keys.add(e.key())
 
     def keyReleaseEvent(self, e):
+        """Handles key release for motion control."""
         self.pressed_keys.discard(e.key())
 
     def send_cmd_vel(self):
+        """
+        Publishes velocity command based on active keys.
+        """
         twist = TwistStamped()
         twist.header.stamp = self.node.get_clock().now().to_msg()
         speed, turn = 1.0, 0.5
@@ -405,6 +521,9 @@ class PantherDashboard(QMainWindow):
         self.node.cmd_vel_pub.publish(twist)
 
     def setup_ui(self):
+        """
+        Creates the main UI layout with camera, sensor, and LiDAR sections.
+        """
         cw = QWidget()
         self.setCentralWidget(cw)
         ms = QSplitter(Qt.Vertical)
@@ -419,6 +538,9 @@ class PantherDashboard(QMainWindow):
         ml.addWidget(ms)
 
     def create_camera_section(self):
+        """
+        Creates a 2x2 grid of camera feeds with status indicators.
+        """
         g = QGroupBox("Camera Feeds")
         l = QGridLayout(g)
         # --- MODIFICATION: No change needed here, logic is robust ---
@@ -432,6 +554,9 @@ class PantherDashboard(QMainWindow):
         return g
 
     def create_camera_widget(self, n, k):
+        """
+        Creates a styled camera widget with label and status indicator.
+        """
         f = QFrame()
         f.setFrameStyle(QFrame.StyledPanel | QFrame.Raised)
         f.setStyleSheet(
@@ -455,6 +580,9 @@ class PantherDashboard(QMainWindow):
         return f
 
     def create_sensor_section(self):
+        """
+        Creates a vertical panel for displaying all sensor values.
+        """
         g = QGroupBox("Sensor Data")
         l = QVBoxLayout(g)
         l.addWidget(self.create_battery_widget())
@@ -471,6 +599,9 @@ class PantherDashboard(QMainWindow):
         return g
 
     def create_battery_widget(self):
+        """
+        Returns a styled widget with battery percentage and voltage.
+        """
         f = QFrame()
         f.setStyleSheet(
             "QFrame{background:#3A4A5C;border:1px solid #4A90E2;border-radius:10px;padding:10px;}"
@@ -498,6 +629,9 @@ class PantherDashboard(QMainWindow):
         return f
 
     def create_sensor_widget(self, t, d):
+        """
+        Returns a (frame, label) tuple for displaying a single sensor value.
+        """
         f = QFrame()
         f.setStyleSheet(
             "QFrame{background:#3A4A5C;border:1px solid #4A90E2;border-radius:10px;padding:5px;}"
@@ -513,6 +647,9 @@ class PantherDashboard(QMainWindow):
         return f, dl
 
     def create_lidar_section(self):
+        """
+        Sets up VTK visualization for LiDAR point cloud data.
+        """
         group = QGroupBox("LiDAR Point Cloud")
         layout = QVBoxLayout(group)
 
@@ -559,6 +696,9 @@ class PantherDashboard(QMainWindow):
         return group
 
     def _add_grid(self, s=1.0, e=10.0):
+        """
+        Adds a visual grid in the LiDAR view.
+        """
         p, l = vtk.vtkPoints(), vtk.vtkCellArray()
         ic = 0
         nl = int(2 * e / s) + 1
@@ -587,6 +727,7 @@ class PantherDashboard(QMainWindow):
         return a
 
     def update_labels(self):
+        """Refreshes sensor values on the GUI."""
         n = self.node
         if n.battery:
             p = n.battery.percentage * 100
@@ -618,16 +759,11 @@ class PantherDashboard(QMainWindow):
             )
 
 
-class RosSpinThread(QThread):
-    def __init__(self, node):
-        super().__init__()
-        self.node = node
-
-    def run(self):
-        rclpy.spin(self.node)
-
-
 def main():
+    """
+    Entry point for the Panther GUI dashboard.
+    Initializes ROS 2, starts Qt application and dashboard window.
+    """
     rclpy.init()
     image_signal = ImageSignal()
     node = PantherSensorNode(image_signal)
