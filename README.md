@@ -30,12 +30,12 @@ pip install opencv-python
 1)
 cd ~/ros2_ws/src
 2)
-####Option A: Use HTTPS with a GitHub Token
+#### Option A: Use HTTPS with a GitHub Token
 Generate a GitHub Personal Access Token (PAT) and run:
-git clone https://<USERNAME>:<TOKEN>@github.com/ANO614/RosTest_GUI.git
-####Option B: Use SSH (Recommended for Private Repos)
+git clone https://<USERNAME>:<TOKEN>@github.com/MindCloud-Team/RosTest_GUI.git
+#### Option B: Use SSH (Recommended for Private Repos)
 If you’ve set up SSH keys with GitHub:
-git clone git@github.com:ANO614/RosTest_GUI.git
+git clone git@github.com:MindCloud-Team/RosTest_GUI.git
 3)
 cd ~/ros2_ws
 4)
@@ -80,6 +80,8 @@ QT_QPA_PLATFORM=xcb python3 <full file destination>
 
 ##To Change Subscribed Topics
 the following topics can be changed to display different topics:
+
+![Working GUI:](images/Topics.png)
 
 
 
