@@ -20,8 +20,9 @@ This package is compatible with:
 ### 1. Install Dependencies
 
 ```bash
-sudo apt install python3-pyqt5 python3-vtk ros-jazzy-cv-bridge
-pip install opencv-python
+sudo apt install python3-pyqt5 ros-jazzy-cv-bridge
+
+pip install opencv-python vtk
 ```
 
 ### 2. Clone & Build
