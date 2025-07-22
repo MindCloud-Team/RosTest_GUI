@@ -59,7 +59,6 @@ import rclpy
 import vtk
 import cv2
 
-# --- MODIFICATION: Added specific QoS imports ---
 from rclpy.qos import (
     qos_profile_sensor_data,
     QoSProfile,
@@ -134,7 +133,6 @@ class ResizablePixmapLabel(QLabel):
                 )
             )
 
-# --- MODIFICATION: Consolidated ImageProcessor threads into one ---
 class CombinedImageProcessor(QThread):
     """
     Worker thread to decode and scale images from all camera topics.
@@ -271,7 +269,6 @@ class PantherSensorNode(Node):
         self.create_subscription(Imu, "/imu/data", self.imu_cb, 10)
         self.create_subscription(Odometry, "/odometry/wheels", self.odom_cb, 10)
         
-        # --- MODIFICATION: Using a more robust QoS for the E-Stop status ---
         # This profile ensures we get the last published state upon connecting.
         estop_qos_profile = QoSProfile(
             depth=1,
@@ -362,7 +359,6 @@ class PantherDashboard(QMainWindow):
         self.setFocusPolicy(Qt.StrongFocus)
         self.pressed_keys = set()
         
-        # --- MODIFICATION: Create a single image processor ---
         self.image_processor = CombinedImageProcessor()
         self.image_processor.pixmap_ready.connect(self.update_camera_feed)
         self.image_processor.start()
@@ -490,7 +486,6 @@ class PantherDashboard(QMainWindow):
         Called when GUI window is closed.
         """
         print("Stopping threads...")
-        # --- MODIFICATION: Stop the single image processor ---
         self.image_processor.stop()
         self.image_processor.wait()
         super().closeEvent(e)
@@ -543,7 +538,6 @@ class PantherDashboard(QMainWindow):
         """
         g = QGroupBox("Camera Feeds")
         l = QGridLayout(g)
-        # --- MODIFICATION: No change needed here, logic is robust ---
         for r, c, n, k in [
             (0, 0, "Front", "front"),
             (0, 1, "Back", "back"),
@@ -750,7 +744,6 @@ class PantherDashboard(QMainWindow):
             self.sensor_labels["cmd"].setText(
                 f"LinX:{lin.x:.2f}m/s, AngZ:{ang.z:.2f}r/s"
             )
-        # --- MODIFICATION: This logic is correct, the QoS change makes it work ---
         if n.e_stop is not None:
             s = "ACTIVE" if n.e_stop else "INACTIVE"
             self.sensor_labels["e_stop"].setText(s)
