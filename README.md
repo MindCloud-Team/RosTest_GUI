@@ -2,18 +2,18 @@
 
 This repository provides a GUI dashboard for the **Husarion Panther robot**, built using **ROS 2 Jazzy**, **PyQt5**, and **VTK**. The dashboard displays real-time sensor data, camera feeds, LiDAR point cloud, and supports keyboard teleoperation.
 
-## 🖥️ Features
+##  Features
 
-- 🔋 Battery status (percentage + voltage)
-- 🧭 IMU orientation display (Roll, Pitch, Yaw)
-- 📍 Odometry position tracking
-- 🚦 E-Stop indicator
-- 🎥 Multi-camera feed viewer (Front, Back, Left, Right)
-- 🌐 3D LiDAR point cloud visualization
-- ⌨️ Teleoperation using `W`, `A`, `S`, `D`
-- ⚡ Responsive UI with threaded image processing
+-  Battery status (percentage + voltage)
+-  IMU orientation display (Roll, Pitch, Yaw)
+-  Odometry position tracking
+-  E-Stop indicator
+-  Multi-camera feed viewer (Front, Back, Left, Right)
+-  3D LiDAR point cloud visualization
+-  Teleoperation using `W`, `A`, `S`, `D`
+-  Responsive UI with threaded image processing
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - ROS 2 Jazzy
 - Python 3
@@ -22,7 +22,7 @@ This repository provides a GUI dashboard for the **Husarion Panther robot**, bui
 - OpenCV (`cv2`)
 - `cv_bridge`, `sensor_msgs`, `geometry_msgs`, `nav_msgs`, `std_msgs`
 
-## 📦 Installation
+## Installation
 
 ### 1. Install Dependencies
 
@@ -41,23 +41,23 @@ colcon build
 source install/setup.bash
 ```
 
-## 🚀 Running the GUI
+## Running the GUI
 
 Make sure your robot or simulation is publishing the required topics. Then launch the GUI with:
 
 ```bash
-ros2 run gui_pkg batgui
+ros2 run gui_pkg GUI
 ```
 
 Or:
 
 ```bash
-python3 src/gui_pkg/gui_pkg/batgui.py
+python3 src/gui_pkg/gui_pkg/GUI.py
 ```
 
 > Ensure ROS 2 is properly sourced before launching.
 
-## ⌨️ Teleop Keys
+## Teleop Keys
 
 | Key | Action        |
 |-----|---------------|
@@ -66,11 +66,11 @@ python3 src/gui_pkg/gui_pkg/batgui.py
 | A   | Turn left     |
 | D   | Turn right    |
 
-## 📸 Screenshot / Demo
+## Screenshot / Demo
 
-> *(Optional: Add images or gifs showing the GUI in use)*
+> *(images showing the GUI)*
 
-## 📁 Folder Overview
+## Folder Overview
 
 ```
 gui_pkg/
@@ -80,17 +80,12 @@ gui_pkg/
 ├── setup.py
 ```
 
-## 🧪 Tested On
+## Tested On
 
 - Ubuntu 22.04
 - ROS 2 Jazzy
 - Panther robot (Husarion) — real & simulated
 
-## 📝 License
+## Author
 
-This project is licensed under the MIT License.
-
-## 👤 Author
-
-Developed by [Ano](https://github.com/ANO614)  
-Part of the **MindCloud-Team**
+Developed by **MindCloud-Team**
