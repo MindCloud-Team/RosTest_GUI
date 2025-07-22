@@ -1,6 +1,8 @@
-# Panther Robot Dashboard GUI
+# RosTestGUI
 
-This repository provides a GUI dashboard for the **Husarion Panther robot**, built using **ROS 2 Jazzy**, **PyQt5**, and **VTK**. The dashboard displays real-time sensor data, camera feeds, LiDAR point cloud, and supports keyboard teleoperation.
+## Introduction
+
+This is a Python-based GUI package designed for the Panther robot's dashboard in ROS 2. It integrates multiple components including video feeds, sensor data, and robot velocity control into a unified graphical interface.
 
 ##  Features
 
