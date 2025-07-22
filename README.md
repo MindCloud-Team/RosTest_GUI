@@ -46,13 +46,7 @@ source install/setup.bash
 Make sure your robot or simulation is publishing the required topics. Then launch the GUI with:
 
 ```bash
-ros2 run gui_pkg GUI
-```
-
-Or:
-
-```bash
-python3 src/gui_pkg/gui_pkg/GUI.py
+QT_QPA_PLATFORM=xcb python3 <full file destination>
 ```
 
 > Ensure ROS 2 is properly sourced before launching.
