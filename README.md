@@ -64,7 +64,7 @@ QT_QPA_PLATFORM=xcb python3 <full file destination>
 
 ## Screenshot / Demo
 
-> *(images showing the GUI)*
+![Working GUI:](images/GUI.png)
 
 ## Folder Overview
 
